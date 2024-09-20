@@ -6,4 +6,9 @@ public class MoveState : PlayerState<MoveState>
 {
     public MoveState(StateMachine stateMachine) : base(stateMachine) { }
 
+    public override void Enter()
+    {
+        base.Enter();
+        
+    }
 }

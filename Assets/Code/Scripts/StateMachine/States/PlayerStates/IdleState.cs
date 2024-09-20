@@ -36,7 +36,7 @@ public class IdleState : PlayerState<IdleState>
         playerMovement.MovementInput = movementInput;
         if(movementInput!=Vector2.zero)
         {
-            Debug.Log("YES");
+            
         }
     }
 

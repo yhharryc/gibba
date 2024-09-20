@@ -10,7 +10,6 @@ public abstract class StateMachine : MonoBehaviour
     private StateData stateData;  // Reference to the ScriptableObject containing the states
 
     // A list to hold instances of cloned states, shown in the inspector using Odin Inspector
-    [ShowInInspector, ReadOnly, ListDrawerSettings(ShowFoldout = true)]
     private List<State> instantiatedStates = new List<State>();
 
     private void Start()
@@ -37,6 +36,7 @@ public abstract class StateMachine : MonoBehaviour
             {
                 State newStateInstance = state.CreateNewInstance(this);  // Clone each state
                 instantiatedStates.Add(newStateInstance);
+                newStateInstance.StateChangeRequested+=OnStateChangeRequested;
             }
         }
     }
@@ -67,5 +67,27 @@ public abstract class StateMachine : MonoBehaviour
     private void LateUpdate()
     {
         currentState?.LateUpdate();
+    }
+
+    // Method to change states based on a state name
+    private void OnStateChangeRequested(string newStateName)
+    {
+        State newState = instantiatedStates.Find(state => state.GetType().Name == newStateName);
+
+        if (newState != null)
+        {
+            ChangeToState(newState);
+        }
+        else
+        {
+            Debug.LogError($"State {newStateName} not found.");
+        }
+    }
+
+    private void OnDestroy() {
+        foreach (State state in instantiatedStates)
+        {
+            state.StateChangeRequested-=OnStateChangeRequested;
+        }
     }
 }
