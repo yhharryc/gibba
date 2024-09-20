@@ -40,13 +40,7 @@ public abstract class StateMachine : MonoBehaviour
             }
         }
     }
-/*
-    // Update method called in the editor whenever something changes in the inspector
-    private void OnValidate()
-    {
-        InitializeStates();  // Re-initialize the state list when the script is edited
-    }
-*/
+
     public void ChangeToState(State newState)
     {
         currentState.Exit();  // Exit the current state

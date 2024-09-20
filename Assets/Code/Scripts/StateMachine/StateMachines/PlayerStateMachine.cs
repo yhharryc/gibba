@@ -34,17 +34,6 @@ public class PlayerStateMachine : StateMachine
         }
     }
 
-    private void OnEnable()
-    {
-        // Enable the input system when the object is enabled
-        //inputActions.Enable();
-    }
-
-    private void OnDisable()
-    {
-        // Disable the input system when the object is disabled
-        //inputActions.Disable();
-    }
 
 
 
