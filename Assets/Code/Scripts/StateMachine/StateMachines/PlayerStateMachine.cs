@@ -7,12 +7,14 @@ using UnityEngine.Events;      // To invoke UnityEvents
 public class PlayerStateMachine : StateMachine
 {
     private PlayerMovement playerMovement;
-
+     // Expose the PlayerInput in the Inspector with Odin Inspector
+    private PlayerInput playerInput;  // Reference to the PlayerInput component
+    public PlayerInput PlayerInput{get{return playerInput;}}
     private void Awake()
     {
         // Try to find the PlayerMovement component in the current GameObject or its children
         playerMovement = GetComponentInChildren<PlayerMovement>();
-
+        playerInput = GetComponentInChildren<PlayerInput>();
         if (playerMovement == null)
         {
             // If PlayerMovement is not found, search for any Rigidbody in this GameObject or its children

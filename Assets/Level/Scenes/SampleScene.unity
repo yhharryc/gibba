@@ -538,19 +538,7 @@ MonoBehaviour:
       m_Calls: []
   m_ActionEvents:
   - m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: 
-        m_MethodName: 
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
     m_ActionId: cb906410-966c-45eb-8712-06a834d5eaf3
     m_ActionName: PlayerControl/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]
   m_NeverAutoSwitchControlSchemes: 0
@@ -570,15 +558,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7c483067372079f4ab1248554368f579, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  defaultState:
-    rid: 2113534478931984386
   stateData: {fileID: 11400000, guid: b0e01ae1f71eba74dba1ff02301c0304, type: 2}
-  references:
-    version: 2
-    RefIds:
-    - rid: 2113534478931984386
-      type: {class: IdleState, ns: , asm: Assembly-CSharp}
-      data: 
 --- !u!54 &1692449843
 Rigidbody:
   m_ObjectHideFlags: 0

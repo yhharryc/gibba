@@ -2,11 +2,21 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem; 
+using Sirenix.OdinInspector;
+using System;
+
+[Serializable]
 public abstract class State
 {
-
+    
     protected StateMachine stateMachine;
     
+    // Constructor for the base state
+    public State(StateMachine stateMachine)
+    {
+        this.stateMachine = stateMachine;
+    }
+
     protected GameObject Owner{
         get{return stateMachine.gameObject;}
     }
@@ -40,4 +50,6 @@ public abstract class State
     {
         
     }
+    // Factory method to create a new instance of the specific state
+    public abstract State CreateNewInstance(StateMachine stateMachine);
 }
