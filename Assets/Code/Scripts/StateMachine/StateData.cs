@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Sirenix.OdinInspector;
 
@@ -26,10 +28,54 @@ public class StateData : SerializedScriptableObject
         }
     }
 
+    // Dropdown to select the type of state to add
+    [ValueDropdown("GetAllStateTypes")]
+    public Type stateToAdd;
+
+    // Use reflection to get all non-abstract types derived from State
+    private IEnumerable<ValueDropdownItem> GetAllStateTypes()
+    {
+        var stateType = typeof(State);
+        var derivedTypes = AppDomain.CurrentDomain.GetAssemblies()
+            .SelectMany(assembly => assembly.GetTypes())
+            .Where(t => t.IsClass && !t.IsAbstract && t.IsSubclassOf(stateType));
+
+        foreach (var type in derivedTypes)
+        {
+            yield return new ValueDropdownItem(type.Name, type);
+        }
+    }
+
     // This method is called when adding new states to the list via the inspector
     private State AddState()
     {
-        // You can modify this method to dynamically create different types of states
-        return new IdleState(null);  // Example: Add an IdleState
+        if (stateToAdd != null)
+        {
+            // Dynamically create an instance of the selected state type
+            State newState = Activator.CreateInstance(stateToAdd, new object[] { null }) as State;
+
+            if (newState != null)
+            {
+                stateList.Add(newState);
+                return newState;
+            }
+        }
+
+        Debug.LogError("Failed to add state.");
+        return null;
+    }
+
+    // Validation method to remove duplicate states
+    private void OnValidate()
+    {
+        if (stateList == null || stateList.Count == 0) return;
+
+        // Remove duplicates by grouping by the state type and keeping only one of each type
+        stateList = stateList
+            .GroupBy(state => state.GetType())  // Group by state type
+            .Select(group => group.First())     // Keep only the first instance of each type
+            .ToList();
+
+        Debug.Log("Duplicate states have been removed.");
     }
 }

@@ -6,7 +6,6 @@ using System;
 
 public class IdleState : PlayerState<IdleState>
 {
-    PlayerMovement playerMovement;
     public IdleState(StateMachine stateMachine) : base(stateMachine) { }
     public override void Enter()
     {
@@ -15,7 +14,7 @@ public class IdleState : PlayerState<IdleState>
 
         if (playerMovement == null)
         {
-            playerMovement = Owner.GetComponentInChildren<PlayerMovement>();
+            playerMovement = Owner.GetComponentInChildren<MovementComponent>();
         }
 
         // Hook the Move action to the Move method
@@ -36,13 +35,14 @@ public class IdleState : PlayerState<IdleState>
         playerMovement.MovementInput = movementInput;
         if(movementInput!=Vector2.zero)
         {
-            
+            RequestStateChange("MoveState");
         }
     }
 
-    // Factory method to create a new instance of the specific state
-    //public override State CreateNewInstance(StateMachine stateMachine)
-    //{
-    //    return new IdleState(stateMachine);  // Return a new instance
-    //}
+    public override void Exit()
+    {
+        playerInput.actions["Move"].performed -= Move;  // Subscribe to the Move input
+        playerInput.actions["Move"].canceled -= Move;   // Also handle canceled input to reset movement
+    }
+
 }

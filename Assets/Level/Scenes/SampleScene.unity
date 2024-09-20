@@ -489,6 +489,8 @@ GameObject:
   - component: {fileID: 1692449842}
   - component: {fileID: 1692449843}
   - component: {fileID: 1692449844}
+  - component: {fileID: 1692449845}
+  - component: {fileID: 1692449846}
   m_Layer: 0
   m_Name: PlayerCharacter
   m_TagString: Untagged
@@ -594,7 +596,7 @@ Rigidbody:
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
   m_UseGravity: 0
-  m_IsKinematic: 1
+  m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 1
@@ -621,6 +623,48 @@ CapsuleCollider:
   m_Height: 1
   m_Direction: 1
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1692449845
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1692449838}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9bed3c1d44b3a8e46b93022b03221e94, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  maxSpeed: 10
+  maxAcceleration: 52
+  maxDecceleration: 52
+  maxTurnSpeed: 80
+  maxAirAcceleration: 0
+  maxAirDeceleration: 0
+  maxAirTurnSpeed: 80
+  friction: 0
+  useAcceleration: 0
+  itsTheIntro: 1
+  velocity: {x: 0, y: 0}
+  onGround: 0
+  pressingKey: 0
+--- !u!114 &1692449846
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1692449838}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14c16c982dfeacb4983765249dddd570, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  groundLength: 0.95
+  colliderOffset: {x: 0, y: 0, z: 0}
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

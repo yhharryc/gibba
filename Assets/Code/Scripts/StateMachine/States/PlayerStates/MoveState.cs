@@ -9,6 +9,5 @@ public class MoveState : PlayerState<MoveState>
     public override void Enter()
     {
         base.Enter();
-        
     }
 }

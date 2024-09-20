@@ -9,7 +9,7 @@ using UnityEngine.InputSystem;
 public abstract class PlayerState<T> : State where T : PlayerState<T>
 {
     protected PlayerInput playerInput;
-    protected PlayerMovement playerMovement;
+    protected MovementComponent playerMovement;
     public PlayerState(StateMachine stateMachine) : base(stateMachine) {
         // Check if the state machine is a PlayerStateMachine and get the PlayerInput
         this.stateMachine = stateMachine;
@@ -36,7 +36,7 @@ public abstract class PlayerState<T> : State where T : PlayerState<T>
 
         if (playerMovement == null)
         {
-            playerMovement = Owner.GetComponentInChildren<PlayerMovement>();
+            playerMovement = Owner.GetComponentInChildren<MovementComponent>();
         }
         
     }
