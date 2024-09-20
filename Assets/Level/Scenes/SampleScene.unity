@@ -572,6 +572,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   defaultState:
     rid: 2113534478931984386
+  stateData: {fileID: 11400000, guid: b0e01ae1f71eba74dba1ff02301c0304, type: 2}
   references:
     version: 2
     RefIds:

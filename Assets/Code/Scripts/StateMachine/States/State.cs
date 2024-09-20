@@ -4,10 +4,18 @@ using UnityEngine;
 using UnityEngine.InputSystem; 
 public abstract class State
 {
+
     protected StateMachine stateMachine;
+    
     protected GameObject Owner{
         get{return stateMachine.gameObject;}
     }
+
+    public void InitializeState(StateMachine stateMachine)
+    {
+        this.stateMachine = stateMachine;
+    }
+
     public virtual void Enter()
     {
 

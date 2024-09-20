@@ -5,12 +5,15 @@ using Sirenix.OdinInspector;
 
 public abstract class StateMachine : MonoBehaviour
 {
-    [SerializeReference]
-    private State defaultState;
+    //[SerializeReference]
+    //private State defaultState;
     private State currentState;
 
+    [SerializeField]
+    private StateData stateData;
     private void Start() {
-        currentState = defaultState;
+        currentState = stateData.DefaultState;
+        currentState.InitializeState(this);
         currentState.Enter();
     }
     public void ChangeToState(State newState)
