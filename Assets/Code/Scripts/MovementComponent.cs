@@ -59,6 +59,7 @@ public class MovementComponent : MonoBehaviour
     {
         //Used to flip the character's sprite when she changes direction
         //Also tells us that we are currently pressing a direction button
+        /*
         if (directionX != 0)
         {
             transform.localScale = new Vector3(directionX > 0 ? 1 : -1, 1, 1);
@@ -68,7 +69,7 @@ public class MovementComponent : MonoBehaviour
         {
             pressingKey = false;
         }
-
+        */
         //Calculate's the character's desired velocity - which is the direction you are facing, multiplied by the character's maximum speed
         //Friction is not used in this game
         desiredVelocity = new Vector2(directionX, 0f) * Mathf.Max(maxSpeed - friction, 0f);
