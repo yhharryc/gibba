@@ -2,13 +2,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem; 
-using Sirenix.OdinInspector;
 using System;
 
-[Serializable]
-public class IdleState : PlayerState
+public class IdleState : PlayerState<IdleState>
 {
-    
     PlayerMovement playerMovement;
     public IdleState(StateMachine stateMachine) : base(stateMachine) { }
     public override void Enter()
@@ -39,13 +36,13 @@ public class IdleState : PlayerState
         playerMovement.MovementInput = movementInput;
         if(movementInput!=Vector2.zero)
         {
-            //Debug.Log("LOOL");
+            Debug.Log("YES");
         }
     }
 
     // Factory method to create a new instance of the specific state
-    public override State CreateNewInstance(StateMachine stateMachine)
-    {
-        return new IdleState(stateMachine);  // Return a new instance
-    }
+    //public override State CreateNewInstance(StateMachine stateMachine)
+    //{
+    //    return new IdleState(stateMachine);  // Return a new instance
+    //}
 }
