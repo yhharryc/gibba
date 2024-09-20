@@ -36,10 +36,7 @@ public abstract class State
     {
         Debug.Log($"{this.GetType().Name} exited on {stateMachine.gameObject.name}.");
     }
-    public virtual void HandleInput()
-    {
 
-    }
     public virtual void Update()
     {
 
