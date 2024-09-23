@@ -499,7 +499,7 @@ Transform:
   m_GameObject: {fileID: 963194225}
   serializedVersion: 2
   m_LocalRotation: {x: 0.03925978, y: 0, z: 0, w: 0.9992291}
-  m_LocalPosition: {x: 0, y: 0.78459024, z: -9.969173}
+  m_LocalPosition: {x: 0, y: -0.37540966, z: -9.969173}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -604,7 +604,7 @@ Transform:
   m_GameObject: {fileID: 992618860}
   serializedVersion: 2
   m_LocalRotation: {x: 0.03925978, y: 0, z: 0, w: 0.9992291}
-  m_LocalPosition: {x: 0, y: 0.78459024, z: -9.969173}
+  m_LocalPosition: {x: 0, y: -0.37540966, z: -9.969173}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -626,6 +626,7 @@ GameObject:
   - component: {fileID: 1692449844}
   - component: {fileID: 1692449845}
   - component: {fileID: 1692449846}
+  - component: {fileID: 1692449847}
   m_Layer: 0
   m_Name: PlayerCharacter
   m_TagString: Untagged
@@ -642,7 +643,7 @@ Transform:
   m_GameObject: {fileID: 1692449838}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -1.16, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -690,6 +691,10 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: cb906410-966c-45eb-8712-06a834d5eaf3
     m_ActionName: PlayerControl/Move[/Keyboard/w,/Keyboard/s,/Keyboard/a,/Keyboard/d]
+  - m_PersistentCalls:
+      m_Calls: []
+    m_ActionId: 71db6940-f431-42eb-9d4f-8c4792011f16
+    m_ActionName: PlayerControl/Jump[/Keyboard/space]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: PlayerControl
@@ -800,6 +805,31 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+--- !u!114 &1692449847
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1692449838}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ee16d8eb8ed8b4428fae600e906109d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  body: {fileID: 0}
+  jumpHeight: 4.01
+  timeToJumpApex: 0.401
+  upwardMovementMultiplier: 2.22
+  downwardMovementMultiplier: 7.58
+  maxAirJumps: 0
+  variableJumpHeight: 0
+  jumpCutOff: 3.55
+  speedLimit: 0
+  coyoteTime: 0.15
+  jumpBuffer: 0.15
+  canJumpAgain: 0
+  onGround: 0
 --- !u!1 &2119265549
 GameObject:
   m_ObjectHideFlags: 0

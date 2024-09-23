@@ -76,6 +76,6 @@ public class StateData : SerializedScriptableObject
             .Select(group => group.First())     // Keep only the first instance of each type
             .ToList();
 
-        Debug.Log("Duplicate states have been removed.");
+        //Debug.Log("Duplicate states have been removed.");
     }
 }

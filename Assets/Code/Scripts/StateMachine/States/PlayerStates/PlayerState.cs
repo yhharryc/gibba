@@ -10,6 +10,8 @@ public abstract class PlayerState<T> : State where T : PlayerState<T>
 {
     protected PlayerInput playerInput;
     protected MovementComponent playerMovement;
+    protected JumpComponent jumpComponent;
+
     public PlayerState(StateMachine stateMachine) : base(stateMachine) {
         // Check if the state machine is a PlayerStateMachine and get the PlayerInput
         this.stateMachine = stateMachine;
@@ -27,6 +29,19 @@ public abstract class PlayerState<T> : State where T : PlayerState<T>
                 Debug.LogError("PlayerInput reference is missing in PlayerState.");
             }
         }
+        if (playerMovement == null)
+        {
+            playerMovement = Owner.GetComponentInChildren<MovementComponent>();
+        }
+        if(jumpComponent==null)
+        {
+            jumpComponent = stateMachine.gameObject.GetComponent<JumpComponent>();
+            if(jumpComponent==null)
+            {
+                jumpComponent = stateMachine.gameObject.AddComponent<JumpComponent>();
+                Debug.Log("Did not find Jump Component on character. Added one. ");
+            }
+        }  
      }
 
     public override void Enter()
@@ -34,11 +49,7 @@ public abstract class PlayerState<T> : State where T : PlayerState<T>
         
         base.Enter();  // Call base Enter method
 
-        if (playerMovement == null)
-        {
-            playerMovement = Owner.GetComponentInChildren<MovementComponent>();
-        }
-        
+
     }
 
     public override State CreateNewInstance(StateMachine stateMachine)

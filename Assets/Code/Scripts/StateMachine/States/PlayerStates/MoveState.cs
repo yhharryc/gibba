@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem; 
-public class MoveState : PlayerState<MoveState>
+public class MoveState : OnGroundState<MoveState>
 {
     public MoveState(StateMachine stateMachine) : base(stateMachine) { }
 

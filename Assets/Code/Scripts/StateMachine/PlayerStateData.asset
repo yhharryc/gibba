@@ -26,7 +26,7 @@ MonoBehaviour:
       Data: 0|System.Collections.Generic.List`1[[State, Assembly-CSharp]], mscorlib
     - Name: 
       Entry: 12
-      Data: 2
+      Data: 3
     - Name: 
       Entry: 7
       Data: 1|IdleState, Assembly-CSharp
@@ -40,6 +40,12 @@ MonoBehaviour:
       Entry: 8
       Data: 
     - Name: 
+      Entry: 7
+      Data: 3|JumpState, Assembly-CSharp
+    - Name: 
+      Entry: 8
+      Data: 
+    - Name: 
       Entry: 13
       Data: 
     - Name: 
@@ -47,10 +53,10 @@ MonoBehaviour:
       Data: 
     - Name: stateToAdd
       Entry: 7
-      Data: 3|System.RuntimeType, mscorlib
+      Data: 4|System.RuntimeType, mscorlib
     - Name: 
       Entry: 1
-      Data: IdleState, Assembly-CSharp
+      Data: JumpState, Assembly-CSharp
     - Name: 
       Entry: 8
       Data: 
