@@ -78,4 +78,5 @@ public class StateData : SerializedScriptableObject
 
         //Debug.Log("Duplicate states have been removed.");
     }
+
 }
