@@ -13,7 +13,7 @@ public abstract class OnGroundState<T> : PlayerState<T> where T : OnGroundState<
 
         if (playerMovement == null)
         {
-            playerMovement = Owner.GetComponentInChildren<MovementComponent>();
+            playerMovement = stateMachine.gameObject.GetComponentInChildren<MovementComponent>();
         }
 
         // Hook the Move action to the Move method

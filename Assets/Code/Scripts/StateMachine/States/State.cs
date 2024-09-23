@@ -19,7 +19,6 @@ public abstract class State
         this.stateMachine = stateMachine;
     }
 
-    protected GameObject Owner => stateMachine.gameObject;
 
     public void InitializeState(StateMachine stateMachine)
     {

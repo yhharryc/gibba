@@ -29,9 +29,16 @@ public abstract class PlayerState<T> : State where T : PlayerState<T>
                 Debug.LogError("PlayerInput reference is missing in PlayerState.");
             }
         }
+
+     }
+
+    public override void Enter()
+    {
+        
+        base.Enter();  // Call base Enter method
         if (playerMovement == null)
         {
-            playerMovement = Owner.GetComponentInChildren<MovementComponent>();
+            playerMovement = stateMachine.gameObject.GetComponentInChildren<MovementComponent>();
         }
         if(jumpComponent==null)
         {
@@ -42,13 +49,6 @@ public abstract class PlayerState<T> : State where T : PlayerState<T>
                 Debug.Log("Did not find Jump Component on character. Added one. ");
             }
         }  
-     }
-
-    public override void Enter()
-    {
-        
-        base.Enter();  // Call base Enter method
-
 
     }
 
