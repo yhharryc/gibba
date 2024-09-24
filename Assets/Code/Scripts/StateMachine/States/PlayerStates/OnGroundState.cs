@@ -21,7 +21,7 @@ public abstract class OnGroundState<T> : PlayerState<T> where T : OnGroundState<
         {
             playerInput.actions["Move"].performed += Move;  // Subscribe to the Move input
             playerInput.actions["Move"].canceled += Move;   // Also handle canceled input to reset movement
-            playerInput.actions["Jump"].performed += Jump;  // Subscribe to the Move input
+            playerInput.actions["Jump"].started += Jump;  // Subscribe to the Move input
             
         }
         else
@@ -35,7 +35,7 @@ public abstract class OnGroundState<T> : PlayerState<T> where T : OnGroundState<
             playerInput.actions["Move"].performed -= Move;  // Subscribe to the Move input
             playerInput.actions["Move"].canceled -= Move;   // Also handle canceled input to reset movement
 
-            playerInput.actions["Jump"].performed -= Jump;  // Subscribe to the Move input
+            playerInput.actions["Jump"].started -= Jump;  // Subscribe to the Move input
         }  
 
         public void Move(InputAction.CallbackContext context)
@@ -50,7 +50,11 @@ public abstract class OnGroundState<T> : PlayerState<T> where T : OnGroundState<
 
         public void Jump(InputAction.CallbackContext context)
         {
+        if (context.started)
+        {
             RequestStateChange("JumpState");
+        }
+           
         }
     } 
 
