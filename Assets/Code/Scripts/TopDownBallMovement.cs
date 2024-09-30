@@ -5,7 +5,8 @@ using UnityEngine.InputSystem;  // For Input System integration
 public class TopDownBallMovement : MonoBehaviour
 {
     [Header("Movement Settings")]
-    public float maxSpeed = 10f;                // Maximum speed for the ball
+    public float maxMovementSpeed = 10f;        // Max speed for movement input
+    public float maxAdditionalSpeed = 15f;      // Max speed for additional forces like gravity
     public float acceleration = 5f;             // How quickly the ball reaches max speed
     public float deceleration = 2f;             // How quickly the ball slows down when no input
     public float downhillAcceleration = 5f;     // Extra acceleration when moving downhill
@@ -19,10 +20,11 @@ public class TopDownBallMovement : MonoBehaviour
     [Header("Physics")]
     public LayerMask groundLayer;               // Layer to detect the ground
     public Transform groundCheck;               // A point at the bottom of the ball to detect ground
-    
+
     private Rigidbody rb;
     private Vector2 movementInput;              // Updated to Vector2 for input
-    private Vector3 velocity;
+    private Vector3 movementVelocity;           // Velocity from player movement
+    private Vector3 additionalVelocity;         // Velocity from gravity and other forces
     private Vector3 slopeDirection;
 
     private bool isGrounded;
@@ -56,9 +58,6 @@ public class TopDownBallMovement : MonoBehaviour
     // Move the ball with applied physics and slope consideration
     void MoveBall()
     {
-        // Apply gravity first so that it's always pulling the player down
-        ApplyCustomGravity();
-
         if (movementInput.magnitude > 0)
         {
             // Convert the 2D movement input to 3D for movement on the XZ plane
@@ -69,22 +68,28 @@ public class TopDownBallMovement : MonoBehaviour
             float adjustedAcceleration = CalculateAdjustedAcceleration(moveDirection);
             Debug.Log($"Adjusted Acceleration: {adjustedAcceleration}");
 
-            Vector3 targetVelocity = moveDirection * maxSpeed;
+            Vector3 targetVelocity = moveDirection * maxMovementSpeed;
 
-            // Apply velocity changes manually
-            velocity += moveDirection * adjustedAcceleration * Time.fixedDeltaTime;
+            // Apply velocity changes manually for movement input
+            movementVelocity += moveDirection * adjustedAcceleration * Time.fixedDeltaTime;
 
-            // Clamp velocity to prevent exceeding maxSpeed
-            //velocity = Vector3.ClampMagnitude(velocity, maxSpeed);
+            // Clamp movement velocity to prevent exceeding maxMovementSpeed
+            movementVelocity = Vector3.ClampMagnitude(movementVelocity, maxMovementSpeed);
         }
         else
         {
-            // Decelerate when no input is given
-            velocity = Vector3.MoveTowards(velocity, Vector3.zero, deceleration * Time.fixedDeltaTime);
+            // Decelerate movement velocity when no input is given
+            movementVelocity = Vector3.MoveTowards(movementVelocity, Vector3.zero, deceleration * Time.fixedDeltaTime);
         }
 
-        // Combine horizontal velocity and vertical velocity (gravity or slope) before applying it to the rigidbody
-        rb.velocity = new Vector3(velocity.x, verticalVelocity, velocity.z);
+        // Combine movement velocity and additional velocity from gravity or slope before applying it to the rigidbody
+        Vector3 finalVelocity = movementVelocity + additionalVelocity;
+
+        // Clamp final velocity to prevent exceeding maxAdditionalSpeed in the additional forces
+        finalVelocity = Vector3.ClampMagnitude(finalVelocity, maxAdditionalSpeed);
+
+        // Apply the combined velocity to the rigidbody
+        rb.velocity = new Vector3(finalVelocity.x, verticalVelocity, finalVelocity.z);
     }
 
 
@@ -133,31 +138,40 @@ public class TopDownBallMovement : MonoBehaviour
 
     // Apply custom gravity, converting vertical velocity to downhill velocity when on a slope
     void ApplyCustomGravity()
+{
+    if (isGrounded)
     {
-        if (isGrounded)
+        if (slopeAngle > slopeThreshold && slopeDirection != Vector3.zero)
         {
-            if (slopeAngle > slopeThreshold && slopeDirection != Vector3.zero)
-            {
-                // Apply projected gravity along the slope direction when grounded
-                Vector3 projectedGravity = Vector3.ProjectOnPlane(Vector3.down * gravity, slopeDirection.normalized);
-                velocity += projectedGravity * Time.fixedDeltaTime;  // This will now always add downhill gravity
+            // Apply projected gravity along the slope direction when grounded
+            Vector3 projectedGravity = Vector3.ProjectOnPlane(Vector3.down * gravity, slopeDirection.normalized);
+            additionalVelocity += projectedGravity * Time.fixedDeltaTime;  // Add downhill gravity
 
-                Debug.Log($"Grounded on Slope: Projected Gravity: {projectedGravity}, Velocity: {velocity}");
-            }
-            else
-            {
-                // Grounded on flat surface, reset vertical velocity
-                verticalVelocity = 0f;
-                Debug.Log("Grounded on Flat Surface: No gravity applied");
-            }
+            Debug.Log($"Grounded on Slope: Projected Gravity: {projectedGravity}, Additional Velocity: {additionalVelocity}");
+        }
+        else if (slopeAngle <= slopeThreshold && additionalVelocity.magnitude > 0)
+        {
+            // Transition from slope to flat ground: Convert vertical momentum to horizontal
+            Vector3 horizontalMomentum = new Vector3(additionalVelocity.x, 0, additionalVelocity.z);
+            additionalVelocity = horizontalMomentum;  // Retain the horizontal part of the velocity
+
+            Debug.Log($"Transitioned to Flat: Preserving Horizontal Momentum: {additionalVelocity}");
         }
         else
         {
-            // Not grounded, apply normal vertical gravity (free-fall)
-            verticalVelocity += gravity * Time.fixedDeltaTime;
-            Debug.Log($"In Air: Vertical Gravity Applied: {verticalVelocity}");
+            // Grounded on flat surface, reset vertical velocity but retain horizontal momentum
+            verticalVelocity = 0f;
+            // Keep additional velocity intact (already set in the transition condition)
+            Debug.Log($"Flat Ground: No Additional Gravity Applied, Momentum Preserved: {additionalVelocity}");
         }
     }
+    else
+    {
+        // Not grounded, apply normal vertical gravity (free-fall)
+        verticalVelocity += gravity * Time.fixedDeltaTime;
+        Debug.Log($"In Air: Vertical Gravity Applied: {verticalVelocity}");
+    }
+}
 
 
     // Check whether the ball is grounded and calculate the slope angle
