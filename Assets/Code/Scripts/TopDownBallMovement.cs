@@ -10,6 +10,7 @@ public class TopDownBallMovement : MonoBehaviour
     public float deceleration = 2f;             // How quickly the ball slows down when no input
     public float downhillAcceleration = 5f;     // Extra acceleration when moving downhill
     public float gravity = -9.81f;              // Custom gravity force
+    public float uphillAccelerationReduction = 0.5f; // Percentage of reduction when moving uphill (50% reduction)
 
     [Header("Slope Detection")]
     public float slopeThreshold = 0.5f;         // Minimum slope angle to apply slope behavior
@@ -55,6 +56,9 @@ public class TopDownBallMovement : MonoBehaviour
     // Move the ball with applied physics and slope consideration
     void MoveBall()
     {
+        // Apply gravity first so that it's always pulling the player down
+        ApplyCustomGravity();
+
         if (movementInput.magnitude > 0)
         {
             // Convert the 2D movement input to 3D for movement on the XZ plane
@@ -69,7 +73,7 @@ public class TopDownBallMovement : MonoBehaviour
 
             // Apply velocity changes manually
             velocity += moveDirection * adjustedAcceleration * Time.fixedDeltaTime;
-            
+
             // Clamp velocity to prevent exceeding maxSpeed
             //velocity = Vector3.ClampMagnitude(velocity, maxSpeed);
         }
@@ -79,7 +83,7 @@ public class TopDownBallMovement : MonoBehaviour
             velocity = Vector3.MoveTowards(velocity, Vector3.zero, deceleration * Time.fixedDeltaTime);
         }
 
-        // Apply the calculated velocity to the rigidbody, including custom gravity for the Y-axis
+        // Combine horizontal velocity and vertical velocity (gravity or slope) before applying it to the rigidbody
         rb.velocity = new Vector3(velocity.x, verticalVelocity, velocity.z);
     }
 
@@ -94,27 +98,24 @@ public class TopDownBallMovement : MonoBehaviour
             // Check if moving downhill (dot product > 0) or uphill (dot product < 0)
             float dot = Vector3.Dot(moveDirection.normalized, slopeDirection.normalized);
             Debug.Log($"Dot Product (Move Direction vs. Slope): {dot}");
-            //adjustedAcceleration = acceleration - downhillAcceleration;    
-            
+
             if (dot > 0)  // Moving downhill
             {
                 // Moving downhill, increase acceleration
-                adjustedAcceleration += acceleration + downhillAcceleration;  // Add both accelerations
+                adjustedAcceleration += downhillAcceleration;  // Add both accelerations
                 Debug.Log("Moving Downhill: Acceleration Increased");
             }
             else if (dot < 0)  // Moving uphill
             {
-                // Moving uphill, apply negative acceleration to simulate sliding back
-                adjustedAcceleration = acceleration - downhillAcceleration;  // Allow for negative acceleration
-                Debug.Log("Moving Uphill: Negative Acceleration Applied");
+                // Moving uphill, reduce acceleration by a percentage
+                float uphillReductionFactor = 1 - uphillAccelerationReduction;
+                adjustedAcceleration *= uphillReductionFactor;  // Reduce acceleration uphill by a percentage
+                Debug.Log($"Moving Uphill: Acceleration Reduced by {uphillReductionFactor * 100}%");
             }
-            
         }
 
-        return acceleration;
+        return adjustedAcceleration;
     }
-
-
 
     // Adjusts the movement input direction according to the slope
     Vector3 AdjustDirectionToSlope(Vector3 inputDirection)
@@ -133,31 +134,31 @@ public class TopDownBallMovement : MonoBehaviour
     // Apply custom gravity, converting vertical velocity to downhill velocity when on a slope
     void ApplyCustomGravity()
     {
-    // When on a slope, project gravity along the slope's surface
-    if (isGrounded)
-    {
-        if (slopeAngle > slopeThreshold && slopeDirection != Vector3.zero)
+        if (isGrounded)
         {
-            // Apply projected gravity along the slope direction when grounded
-            Vector3 projectedGravity = Vector3.ProjectOnPlane(Vector3.down * gravity, slopeDirection.normalized);
-            velocity += projectedGravity * Time.fixedDeltaTime;
+            if (slopeAngle > slopeThreshold && slopeDirection != Vector3.zero)
+            {
+                // Apply projected gravity along the slope direction when grounded
+                Vector3 projectedGravity = Vector3.ProjectOnPlane(Vector3.down * gravity, slopeDirection.normalized);
+                velocity += projectedGravity * Time.fixedDeltaTime;  // This will now always add downhill gravity
 
-            Debug.Log($"Grounded on Slope: Projected Gravity: {projectedGravity}, Velocity: {velocity}");
+                Debug.Log($"Grounded on Slope: Projected Gravity: {projectedGravity}, Velocity: {velocity}");
+            }
+            else
+            {
+                // Grounded on flat surface, reset vertical velocity
+                verticalVelocity = 0f;
+                Debug.Log("Grounded on Flat Surface: No gravity applied");
+            }
         }
         else
         {
-            // Grounded on flat surface, no need to apply gravity, but reset vertical velocity
-            verticalVelocity = 0f;
-            Debug.Log("Grounded on Flat Surface: No gravity applied");
+            // Not grounded, apply normal vertical gravity (free-fall)
+            verticalVelocity += gravity * Time.fixedDeltaTime;
+            Debug.Log($"In Air: Vertical Gravity Applied: {verticalVelocity}");
         }
     }
-    else
-    {
-        // Not grounded, apply normal vertical gravity (free-fall)
-        verticalVelocity += gravity * Time.fixedDeltaTime;
-        Debug.Log($"In Air: Vertical Gravity Applied: {verticalVelocity}");
-    }
-    }
+
 
     // Check whether the ball is grounded and calculate the slope angle
     void CheckGroundAndSlope()
