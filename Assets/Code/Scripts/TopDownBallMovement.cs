@@ -22,6 +22,8 @@ public class TopDownBallMovement : MonoBehaviour
     private Vector3 movementVelocity;           // Current velocity from movement
     private bool isGrounded;                    // Is the player grounded?
 
+    private Vector3 slopeNormal;                // Store the current ground normal for slope adjustment
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -49,7 +51,7 @@ public class TopDownBallMovement : MonoBehaviour
     {
         // Apply the player's movement based on input
         MovePlayer();
-        
+
         // Apply custom gravity when not grounded
         if (!isGrounded)
         {
@@ -63,14 +65,16 @@ public class TopDownBallMovement : MonoBehaviour
         movementInput = value.Get<Vector2>();  // Get movement input as a Vector2
     }
 
-    // Move the player using Rigidbody physics
+    // Move the player using Rigidbody physics and project movement direction onto the slope
     void MovePlayer()
     {
-        // If the player is providing movement input
         if (movementInput.magnitude > 0)
         {
             // Convert 2D input into 3D direction for XZ movement
-            Vector3 moveDirection = new Vector3(movementInput.x, 0, movementInput.y).normalized;
+            Vector3 inputDirection = new Vector3(movementInput.x, 0, movementInput.y).normalized;
+
+            // Adjust the input direction based on the slope
+            Vector3 moveDirection = AdjustDirectionToSlope(inputDirection);
 
             // Calculate the target velocity based on the movement direction
             Vector3 targetVelocity = moveDirection * maxMovementSpeed;
@@ -100,6 +104,15 @@ public class TopDownBallMovement : MonoBehaviour
     {
         // Perform a sphere check to see if the player is touching the ground
         isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
+
+        if (isGrounded)
+        {
+            RaycastHit hit;
+            if (Physics.Raycast(groundCheck.position, Vector3.down, out hit, 1f, groundLayer))
+            {
+                slopeNormal = hit.normal;  // Store the slope normal for slope adjustments
+            }
+        }
 
         // Reset the vertical velocity if grounded to avoid small fall-off forces
         if (isGrounded)
@@ -146,6 +159,29 @@ public class TopDownBallMovement : MonoBehaviour
 
         return Vector3.zero;  // Return zero vector if no ground is detected
     }
+
+    // Adjusts the movement input direction according to the slope
+    Vector3 AdjustDirectionToSlope(Vector3 inputDirection)
+    {
+        if (slopeNormal != Vector3.zero)
+        {
+            // Project the input direction onto the slope using the ground normal
+            Vector3 slopeAdjustedDirection = Vector3.ProjectOnPlane(inputDirection, slopeNormal);
+
+            // Draw a debug line from the player's position showing the original input direction in blue
+            Debug.DrawLine(transform.position, transform.position + inputDirection * 2f, Color.blue);
+
+            // Draw a debug line from the player's position showing the slope-adjusted direction in green
+            Debug.DrawLine(transform.position, transform.position + slopeAdjustedDirection * 2f, Color.green);
+
+            return slopeAdjustedDirection.normalized;
+        }
+
+        // If no slope normal is detected, return the original input direction and draw it
+        Debug.DrawLine(transform.position, transform.position + inputDirection * 2f, Color.blue);
+        return inputDirection;
+    }
+
 
     // Debugging: Draw a sphere in the editor to visualize the ground check area
     void OnDrawGizmosSelected()
