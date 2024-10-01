@@ -33,6 +33,16 @@ public class TopDownBallMovement : MonoBehaviour
     {
         // Perform ground check every frame to see if the player is grounded
         CheckGroundStatus();
+
+        // Optional: Log the current slope angle for debugging
+        if (isGrounded)
+        {
+            float slopeAngle = GetSlopeAngle();
+            Debug.Log($"Current Slope Angle: {slopeAngle}");
+
+            Vector3 downhillDirection = GetDownhillDirection();
+            Debug.Log($"Downhill Direction: {downhillDirection}");
+        }
     }
 
     void FixedUpdate()
@@ -96,6 +106,45 @@ public class TopDownBallMovement : MonoBehaviour
         {
             rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
         }
+    }
+
+    // Function to get the slope angle of the ground the player is currently on
+    public float GetSlopeAngle()
+    {
+        RaycastHit hit;
+
+        // Perform a raycast downwards to check the ground normal
+        if (Physics.Raycast(groundCheck.position, Vector3.down, out hit, 1f, groundLayer))
+        {
+            // Calculate the angle between the ground normal and the world's up vector
+            float slopeAngle = Vector3.Angle(hit.normal, Vector3.up);
+
+            // Return the slope angle, rounded to the nearest integer, but keeping the variable as a float
+            return Mathf.Round(slopeAngle);
+        }
+
+        return 0f;  // Return 0 if no ground is detected
+    }
+
+    // Function to get the downhill direction of the slope
+    public Vector3 GetDownhillDirection()
+    {
+        RaycastHit hit;
+
+        // Perform a raycast downwards to check the ground normal
+        if (Physics.Raycast(groundCheck.position, Vector3.down, out hit, 1f, groundLayer))
+        {
+            // Get the surface normal
+            Vector3 groundNormal = hit.normal;
+
+            // Calculate the downhill direction by projecting the normal onto the XZ plane
+            Vector3 downhillDirection = Vector3.Cross(Vector3.Cross(groundNormal, Vector3.up), groundNormal);
+            downhillDirection.Normalize();
+
+            return downhillDirection;  // Return the normalized downhill direction
+        }
+
+        return Vector3.zero;  // Return zero vector if no ground is detected
     }
 
     // Debugging: Draw a sphere in the editor to visualize the ground check area
