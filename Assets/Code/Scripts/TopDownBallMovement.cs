@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;  // For TextMeshPro integration
 using UnityEngine.InputSystem;  // For Input System integration
 
 [RequireComponent(typeof(Rigidbody))]
@@ -12,6 +13,10 @@ public class TopDownBallMovement : MonoBehaviour
     public float downhillAcceleration = 5f;     // Extra acceleration when moving downhill
     public float gravity = -9.81f;              // Custom gravity force
     public float uphillAccelerationReduction = 0.5f; // Percentage of reduction when moving uphill (50% reduction)
+
+    [Header("UI References")]
+    public TextMeshProUGUI movementVelocityText;    // Reference for movement velocity TextMeshPro
+    public TextMeshProUGUI additionalVelocityText;  // Reference for additional velocity TextMeshPro
 
     [Header("Slope Detection")]
     public float slopeThreshold = 0.5f;         // Minimum slope angle to apply slope behavior
@@ -41,6 +46,7 @@ public class TopDownBallMovement : MonoBehaviour
     void Update()
     {
         CheckGroundAndSlope();
+        UpdateVelocityUI();  // Update UI Text fields with velocity data
     }
 
     void FixedUpdate()
@@ -75,6 +81,12 @@ public class TopDownBallMovement : MonoBehaviour
 
             // Clamp movement velocity to prevent exceeding maxMovementSpeed
             movementVelocity = Vector3.ClampMagnitude(movementVelocity, maxMovementSpeed);
+
+            // Apply interaction between movement and additional velocity
+            if (maxMovementSpeed - movementVelocity.magnitude < 0.3f)
+            {
+                HandleAdditionalVelocityInteraction(moveDirection);
+            }
         }
         else
         {
@@ -86,12 +98,51 @@ public class TopDownBallMovement : MonoBehaviour
         Vector3 finalVelocity = movementVelocity + additionalVelocity;
 
         // Clamp final velocity to prevent exceeding maxAdditionalSpeed in the additional forces
-        finalVelocity = Vector3.ClampMagnitude(finalVelocity, maxAdditionalSpeed);
+        finalVelocity = Vector3.ClampMagnitude(finalVelocity, maxAdditionalSpeed+maxMovementSpeed);
 
         // Apply the combined velocity to the rigidbody
         rb.velocity = new Vector3(finalVelocity.x, verticalVelocity, finalVelocity.z);
     }
 
+    void HandleAdditionalVelocityInteraction(Vector3 moveDirection)
+    {
+        // Get the dot product to determine whether moving with or against additional velocity
+        float dot = Vector3.Dot(moveDirection.normalized, additionalVelocity.normalized);
+
+        if (dot < 0)  // Moving against the direction of the additional velocity
+        {
+            // Reduce additional velocity based on the movement acceleration
+            additionalVelocity += moveDirection.normalized * acceleration * Time.fixedDeltaTime;
+
+            // Clamp to avoid over-compensating
+            additionalVelocity = Vector3.ClampMagnitude(additionalVelocity, maxAdditionalSpeed);
+
+            Debug.Log($"Moving Against Additional Velocity: Adjusting Downward. Additional Velocity: {additionalVelocity}");
+        }
+        else if (dot > 0)  // Moving in the same direction as additional velocity
+        {
+            // Moving with the additional velocity doesn't increase it
+            // but you still move with the current additional velocity
+            Debug.Log("Moving with Additional Velocity: No Effect on Additional Velocity");
+        }
+    }
+
+    // Update the velocity information in the TextMeshPro components
+    void UpdateVelocityUI()
+    {
+        // Check if the text objects are assigned
+        if (movementVelocityText != null)
+        {
+            // Update the text with movement velocity information
+            movementVelocityText.text = $"Movement Velocity: {movementVelocity.magnitude:F2}";
+        }
+
+        if (additionalVelocityText != null)
+        {
+            // Update the text with additional velocity information
+            additionalVelocityText.text = $"Additional Velocity: {additionalVelocity.magnitude:F2}";
+        }
+    }
 
     // Calculate the adjusted acceleration based on whether moving uphill or downhill
     float CalculateAdjustedAcceleration(Vector3 moveDirection)
@@ -138,41 +189,40 @@ public class TopDownBallMovement : MonoBehaviour
 
     // Apply custom gravity, converting vertical velocity to downhill velocity when on a slope
     void ApplyCustomGravity()
-{
-    if (isGrounded)
     {
-        if (slopeAngle > slopeThreshold && slopeDirection != Vector3.zero)
+        if (isGrounded)
         {
-            // Apply projected gravity along the slope direction when grounded
-            Vector3 projectedGravity = Vector3.ProjectOnPlane(Vector3.down * gravity, slopeDirection.normalized);
-            additionalVelocity += projectedGravity * Time.fixedDeltaTime;  // Add downhill gravity
+            if (slopeAngle > slopeThreshold && slopeDirection != Vector3.zero)
+            {
+                // Apply projected gravity along the slope direction when grounded
+                Vector3 projectedGravity = Vector3.ProjectOnPlane(Vector3.down * gravity, slopeDirection.normalized);
+                additionalVelocity += projectedGravity * Time.fixedDeltaTime;  // Add downhill gravity
 
-            Debug.Log($"Grounded on Slope: Projected Gravity: {projectedGravity}, Additional Velocity: {additionalVelocity}");
-        }
-        else if (slopeAngle <= slopeThreshold && additionalVelocity.magnitude > 0)
-        {
-            // Transition from slope to flat ground: Convert vertical momentum to horizontal
-            Vector3 horizontalMomentum = new Vector3(additionalVelocity.x, 0, additionalVelocity.z);
-            additionalVelocity = horizontalMomentum;  // Retain the horizontal part of the velocity
+                Debug.Log($"Grounded on Slope: Projected Gravity: {projectedGravity}, Additional Velocity: {additionalVelocity}");
+            }
+            else if (slopeAngle <= slopeThreshold && additionalVelocity.magnitude > 0)
+            {
+                // Transition from slope to flat ground: Convert vertical momentum to horizontal
+                Vector3 horizontalMomentum = new Vector3(additionalVelocity.x, 0, additionalVelocity.z);
+                additionalVelocity = horizontalMomentum;  // Retain the horizontal part of the velocity
 
-            Debug.Log($"Transitioned to Flat: Preserving Horizontal Momentum: {additionalVelocity}");
+                Debug.Log($"Transitioned to Flat: Preserving Horizontal Momentum: {additionalVelocity}");
+            }
+            else
+            {
+                // Grounded on flat surface, reset vertical velocity but retain horizontal momentum
+                verticalVelocity = 0f;
+                // Keep additional velocity intact (already set in the transition condition)
+                Debug.Log($"Flat Ground: No Additional Gravity Applied, Momentum Preserved: {additionalVelocity}");
+            }
         }
         else
         {
-            // Grounded on flat surface, reset vertical velocity but retain horizontal momentum
-            verticalVelocity = 0f;
-            // Keep additional velocity intact (already set in the transition condition)
-            Debug.Log($"Flat Ground: No Additional Gravity Applied, Momentum Preserved: {additionalVelocity}");
+            // Not grounded, apply normal vertical gravity (free-fall)
+            verticalVelocity += gravity * Time.fixedDeltaTime;
+            Debug.Log($"In Air: Vertical Gravity Applied: {verticalVelocity}");
         }
     }
-    else
-    {
-        // Not grounded, apply normal vertical gravity (free-fall)
-        verticalVelocity += gravity * Time.fixedDeltaTime;
-        Debug.Log($"In Air: Vertical Gravity Applied: {verticalVelocity}");
-    }
-}
-
 
     // Check whether the ball is grounded and calculate the slope angle
     void CheckGroundAndSlope()
@@ -194,10 +244,31 @@ public class TopDownBallMovement : MonoBehaviour
         }
     }
 
-    // Debugging: Draw ray to visualize ground detection
-    void OnDrawGizmosSelected()
+    // Debugging: Draw lines in Scene view to visualize movement and additional velocities
+    [Header("Gizmos Settings")]
+    public float minLineLength = 0f;  // Minimum line length for visualization
+    public float maxLineLength = 5f;    // Maximum line length for visualization
+
+    // Debugging: Draw lines in Scene view to visualize movement and additional velocities
+    void OnDrawGizmos()
     {
+        // Interpolate movement velocity to fit between the minimum and maximum line length
+        float movementVelocityMagnitude = Mathf.Clamp(movementVelocity.magnitude, 0, maxMovementSpeed);
+        float movementLineLength = Mathf.Lerp(minLineLength, maxLineLength, movementVelocityMagnitude / maxMovementSpeed);
+        Vector3 movementLine = movementVelocity.normalized * movementLineLength;
+
+        // Interpolate additional velocity to fit between the minimum and maximum line length
+        float additionalVelocityMagnitude = Mathf.Clamp(additionalVelocity.magnitude, 0, maxAdditionalSpeed);
+        float additionalLineLength = Mathf.Lerp(minLineLength, maxLineLength, additionalVelocityMagnitude / maxAdditionalSpeed);
+        Vector3 additionalLine = additionalVelocity.normalized * additionalLineLength;
+
+        // Draw movement velocity line (green)
+        Gizmos.color = Color.green;
+        Gizmos.DrawLine(transform.position, transform.position + movementLine);
+
+        // Draw additional velocity line (red)
         Gizmos.color = Color.red;
-        Gizmos.DrawLine(groundCheck.position, groundCheck.position + Vector3.down * 0.2f);
+        Gizmos.DrawLine(transform.position, transform.position + additionalLine);
     }
+
 }
