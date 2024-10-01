@@ -23,6 +23,19 @@ public class TopDownBallMovement : MonoBehaviour
     private bool isGrounded;                    // Is the player grounded?
 
     private Vector3 slopeNormal;                // Store the current ground normal for slope adjustment
+    public bool IsOnSlope
+    {
+        get
+        {
+            // Return the slope angle if grounded and the slope angle is greater than the threshold
+            if (isGrounded && GetSlopeAngle() > 0.1f)
+            {
+                return true;
+            }
+            // Return 0 if not on a slope
+            return false;
+        }
+    }
 
     void Start()
     {
@@ -50,13 +63,10 @@ public class TopDownBallMovement : MonoBehaviour
     void FixedUpdate()
     {
         // Apply the player's movement based on input
-        MovePlayer();
+        //MovePlayer();
 
-        // Apply custom gravity when not grounded
-        if (!isGrounded)
-        {
-            ApplyCustomGravity();
-        }
+
+        ApplyCustomGravity();
     }
 
     // Input callback from the Unity Input System
@@ -92,12 +102,44 @@ public class TopDownBallMovement : MonoBehaviour
         rb.velocity = new Vector3(movementVelocity.x, rb.velocity.y, movementVelocity.z);
     }
 
-    // Apply custom gravity when the player is not grounded
-    void ApplyCustomGravity()
+    
+// New variable for custom angle adjustment
+public float downhillGravityAngle = 10f;  // Angle in degrees to rotate the downhill direction
+
+void ApplyCustomGravity()
+{
+    if (isGrounded && IsOnSlope)
     {
-        // Apply gravity to the Y-axis velocity
-        rb.velocity += Vector3.up * customGravity * Time.fixedDeltaTime;
+        // Get the downhill direction of the slope
+        Vector3 downhillDirection = GetDownhillDirection();
+
+        // Rotate the downhill direction by the specified angle
+        Quaternion rotation = Quaternion.AngleAxis(downhillGravityAngle, Vector3.right);  // Rotate around the X axis
+        Vector3 rotatedDownhillDirection = rotation * downhillDirection;
+
+        // Project the gravity force onto the slope (in the rotated downhill direction)
+        Vector3 slopeGravity = rotatedDownhillDirection * Mathf.Abs(customGravity);
+
+        // Apply the projected gravity along the slope
+        rb.velocity += slopeGravity * Time.fixedDeltaTime;
+
+        Debug.Log($"Slope Gravity Applied (Rotated): {slopeGravity}");
+        Debug.DrawLine(transform.position, transform.position + rotatedDownhillDirection * 1.5f, Color.red);
     }
+    else if (isGrounded)
+    {
+        // Handle flat ground case here if needed
+    }
+    else
+    {
+        // Apply normal vertical gravity when not grounded
+        rb.velocity += Vector3.up * customGravity * Time.fixedDeltaTime;
+        Debug.Log($"Normal Gravity Applied: {customGravity}");
+    }
+}
+
+
+
 
     // Check if the player is grounded using a sphere overlap at the groundCheck position
     void CheckGroundStatus()
@@ -151,14 +193,24 @@ public class TopDownBallMovement : MonoBehaviour
             Vector3 groundNormal = hit.normal;
 
             // Calculate the downhill direction by projecting the normal onto the XZ plane
-            Vector3 downhillDirection = Vector3.Cross(Vector3.Cross(groundNormal, Vector3.up), groundNormal);
+            Vector3 downhillDirection = Vector3.Cross(Vector3.Cross(Vector3.up, groundNormal), groundNormal);
             downhillDirection.Normalize();
+
+            // Ensure the downhill direction is correct
+            if (downhillDirection.y > 0) // Check if it's pointing upwards
+            {
+                downhillDirection = -downhillDirection; // Invert to point downhill
+            }
+
+            // Draw the debug line for downhill direction (1.5 units long)
+            Debug.DrawLine(transform.position, transform.position + downhillDirection * 1.5f, Color.red);
 
             return downhillDirection;  // Return the normalized downhill direction
         }
 
         return Vector3.zero;  // Return zero vector if no ground is detected
     }
+
 
     // Adjusts the movement input direction according to the slope
     Vector3 AdjustDirectionToSlope(Vector3 inputDirection)
