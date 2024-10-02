@@ -16,7 +16,7 @@ public class TopDownBallMovement : MonoBehaviour
 
     [Header("Ground Detection")]
     public Transform groundCheck;               // A point at the bottom to detect ground
-    public float groundCheckRadius = 0.2f;      // Radius for ground check
+    public float groundCheckLength = 0.2f;      
     public LayerMask groundLayer;               // Layer to detect the ground
 
     private Rigidbody rb;
@@ -174,7 +174,7 @@ public class TopDownBallMovement : MonoBehaviour
     void CheckGroundStatus()
     {
         // Perform a line cast to check if the player is touching the ground
-        isGrounded = Physics.Raycast(groundCheck.position, Vector3.down, groundCheckRadius, groundLayer);
+        isGrounded = Physics.Raycast(groundCheck.position, Vector3.down, groundCheckLength, groundLayer);
 
         if (isGrounded)
         {
@@ -214,7 +214,7 @@ public class TopDownBallMovement : MonoBehaviour
         RaycastHit hit;
 
         // Perform a raycast downwards to check the ground normal
-        if (Physics.Raycast(groundCheck.position, Vector3.down, out hit, 1f, groundLayer))
+        if (Physics.Raycast(groundCheck.position, Vector3.down, out hit, groundCheckLength, groundLayer))
         {
             // Get the surface normal
             Vector3 groundNormal = hit.normal;
@@ -273,7 +273,7 @@ public class TopDownBallMovement : MonoBehaviour
         if (groundCheck != null)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawLine(groundCheck.position, groundCheck.position + Vector3.down * groundCheckRadius);
+            Gizmos.DrawLine(groundCheck.position, groundCheck.position + Vector3.down * groundCheckLength);
         }
     }
 }
