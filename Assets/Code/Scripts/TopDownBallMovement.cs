@@ -31,11 +31,21 @@ public class TopDownBallMovement : MonoBehaviour
     public float uphillDirectionFactor = 0.5f;  // Factor to reduce movement in the uphill direction
     public float verticalToHorizontalFactor = 0.5f;  // Factor for vertical to horizontal velocity conversion
 
+     [Header("Rotation Settings")]
+    public Transform ballMesh;                  // Reference to the child with MeshRenderer
+    public float maxRotationSpeed = 100f;       // Maximum rotation speed based on velocity
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
         rb.useGravity = false;  // Disable Unity's built-in gravity, we'll handle our own
         rb.constraints = RigidbodyConstraints.FreezeRotation;  // Prevent rotation, so movement is smooth
+
+        // Grab the child GameObject that has a MeshRenderer component
+        if (ballMesh == null)
+        {
+            ballMesh = GetComponentInChildren<MeshRenderer>().transform;
+        }
     }
 
     void Update()
@@ -71,11 +81,12 @@ public class TopDownBallMovement : MonoBehaviour
 
         // Apply custom gravity regardless of being grounded or not
         ApplyCustomGravity();
+        
+        // Apply final velocity to the rigidbody
         rb.velocity = movementVelocity + additionalVelocity;
 
-        // Log the movement and additional velocity for debugging
-        Debug.Log($"Movement Velocity: {movementVelocity}, Additional Velocity: {additionalVelocity}, Final Velocity: {rb.velocity}");
-
+        // Rotate the ball based on the velocity
+        RotateBall();
     }
 
     // Input callback from the Unity Input System
@@ -84,7 +95,26 @@ public class TopDownBallMovement : MonoBehaviour
         movementInput = value.Get<Vector2>();  // Get movement input as a Vector2
     }
 
-    
+    // Rotate the ball mesh in the direction of the velocity
+    void RotateBall()
+    {
+        if (ballMesh != null && (movementVelocity + additionalVelocity).magnitude > 0.1f)
+        {
+            // Get the velocity in the XZ plane (ignore Y)
+            Vector3 velocityXZ = new Vector3(rb.velocity.x, 0, rb.velocity.z);
+            if (velocityXZ.magnitude > 0.1f)
+            {
+                // Calculate the rotation axis based on the velocity (rotate around the axis perpendicular to movement)
+                Vector3 rotationAxis = Vector3.Cross(Vector3.up, velocityXZ).normalized;
+
+                // Calculate the rotation speed based on the velocity magnitude
+                float rotationSpeed = Mathf.Lerp(0f, maxRotationSpeed, velocityXZ.magnitude / (maxMovementSpeed + maxAdditionalSpeed));
+
+                // Rotate the ball mesh around the calculated axis
+                ballMesh.Rotate(rotationAxis, rotationSpeed * Time.fixedDeltaTime, Space.World);
+            }
+        }
+    }
 
     void MovePlayer()
     {
