@@ -1425,7 +1425,7 @@ MonoBehaviour:
   maxMovementSpeed: 10
   maxAdditionalSpeed: 10
   acceleration: 9
-  deceleration: 4
+  deceleration: 2
   customGravity: -9.81
   slopeGravityMultiplier: 1
   groundCheck: {fileID: 802435835}
