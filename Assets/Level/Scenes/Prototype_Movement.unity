@@ -780,7 +780,7 @@ Transform:
   m_GameObject: {fileID: 802435834}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.4, z: 0}
+  m_LocalPosition: {x: 0, y: -0.453, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1427,10 +1427,11 @@ MonoBehaviour:
   deceleration: 2
   customGravity: -9.81
   groundCheck: {fileID: 802435835}
-  groundCheckRadius: 0.2
+  groundCheckLength: 0.2
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  downhillGravityAngle: -20
 --- !u!54 &1951439226
 Rigidbody:
   m_ObjectHideFlags: 0
