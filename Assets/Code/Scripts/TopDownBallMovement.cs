@@ -29,7 +29,7 @@ public class TopDownBallMovement : MonoBehaviour
     private Vector3 slopeNormal;                // Store the slope normal for slope-related calculations
 
     public float uphillDirectionFactor = 0.5f;  // Factor to reduce movement in the uphill direction
-    
+
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -98,7 +98,7 @@ public class TopDownBallMovement : MonoBehaviour
                 if (uphillDot > 0)  // Player is moving uphill
                 {
                     // Reduce the acceleration based on how aligned the movement is with the uphill direction
-                    moveDirectionOnSlope -= uphillDirection * uphillDirectionFactor * uphillDot;
+                    moveDirectionOnSlope = uphillDirection * uphillDirectionFactor * uphillDot;
                     
                     Debug.Log($"Moving Uphill: Reducing movement by {uphillDot * uphillDirectionFactor}");
                 }

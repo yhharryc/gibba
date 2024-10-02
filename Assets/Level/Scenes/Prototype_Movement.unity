@@ -1433,7 +1433,7 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  uphillDirectionFactor: 0.2
+  uphillDirectionFactor: 0.4
   downhillRotationAngle: -10
 --- !u!54 &1951439226
 Rigidbody:
