@@ -14,7 +14,7 @@ public class TopDownBallMovement : MonoBehaviour
 
     [Header("Ground Detection")]
     public Transform groundCheck;               // A point at the bottom to detect ground
-    public float groundCheckRadius = 0.2f;      // Radius for ground check
+    public float groundCheckLength = 0.2f;      // Radius for ground check
     public LayerMask groundLayer;               // Layer to detect the ground
 
     private Rigidbody rb;
@@ -46,7 +46,18 @@ public class TopDownBallMovement : MonoBehaviour
 
     void Update()
     {
+
+    }
+    void LateUpdate()
+    {
         // Perform ground check every frame to see if the player is grounded
+
+    }
+    void FixedUpdate()
+    {
+        // Apply the player's movement based on input
+        //MovePlayer();
+
         CheckGroundStatus();
 
         // Optional: Log the current slope angle for debugging
@@ -58,14 +69,6 @@ public class TopDownBallMovement : MonoBehaviour
             Vector3 downhillDirection = GetDownhillDirection();
             Debug.Log($"Downhill Direction: {downhillDirection}");
         }
-    }
-
-    void FixedUpdate()
-    {
-        // Apply the player's movement based on input
-        //MovePlayer();
-
-
         ApplyCustomGravity();
     }
 
@@ -112,7 +115,7 @@ void ApplyCustomGravity()
     {
         // Get the downhill direction of the slope
         Vector3 downhillDirection = GetDownhillDirection();
-
+        
         // Rotate the downhill direction by the specified angle
         Quaternion rotation = Quaternion.AngleAxis(downhillGravityAngle, Vector3.right);  // Rotate around the X axis
         Vector3 rotatedDownhillDirection = rotation * downhillDirection;
@@ -124,11 +127,11 @@ void ApplyCustomGravity()
         rb.velocity += slopeGravity * Time.fixedDeltaTime;
 
         Debug.Log($"Slope Gravity Applied (Rotated): {slopeGravity}");
-        Debug.DrawLine(transform.position, transform.position + rotatedDownhillDirection * 1.5f, Color.red);
+        Debug.DrawLine(transform.position, transform.position + rotatedDownhillDirection * 1.5f, Color.red,2f);
     }
     else if (isGrounded)
     {
-        // Handle flat ground case here if needed
+
     }
     else
     {
@@ -141,27 +144,26 @@ void ApplyCustomGravity()
 
 
 
-    // Check if the player is grounded using a sphere overlap at the groundCheck position
-    void CheckGroundStatus()
+// Check if the player is grounded using a raycast instead of a sphere check
+void CheckGroundStatus()
+{
+    // Perform a raycast from the groundCheck position straight downwards
+    RaycastHit hit;
+    if (Physics.Raycast(groundCheck.position, Vector3.down, out hit, groundCheckLength, groundLayer))
     {
-        // Perform a sphere check to see if the player is touching the ground
-        isGrounded = Physics.CheckSphere(groundCheck.position, groundCheckRadius, groundLayer);
+        isGrounded = true;  // The player is grounded if the raycast hits something
 
-        if (isGrounded)
-        {
-            RaycastHit hit;
-            if (Physics.Raycast(groundCheck.position, Vector3.down, out hit, 1f, groundLayer))
-            {
-                slopeNormal = hit.normal;  // Store the slope normal for slope adjustments
-            }
-        }
+        // Store the slope normal for slope adjustments
+        slopeNormal = hit.normal;
 
-        // Reset the vertical velocity if grounded to avoid small fall-off forces
-        if (isGrounded)
-        {
-            rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
-        }
+        // Reset the vertical velocity to prevent small fall-off forces
+        rb.velocity = new Vector3(rb.velocity.x, 0, rb.velocity.z);
     }
+    else
+    {
+        isGrounded = false;  // The player is not grounded if the raycast misses
+    }
+}
 
     // Function to get the slope angle of the ground the player is currently on
     public float GetSlopeAngle()
@@ -235,13 +237,18 @@ void ApplyCustomGravity()
     }
 
 
-    // Debugging: Draw a sphere in the editor to visualize the ground check area
+
     void OnDrawGizmosSelected()
     {
         if (groundCheck != null)
         {
             Gizmos.color = Color.red;
-            Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+
+            // Draw a line to visualize the raycast
+            Vector3 raycastEndPoint = groundCheck.position + Vector3.down * groundCheckLength; // 1f is the distance of the raycast
+            Gizmos.DrawLine(groundCheck.position, raycastEndPoint);
+
         }
     }
+
 }
