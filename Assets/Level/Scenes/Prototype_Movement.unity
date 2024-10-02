@@ -1424,14 +1424,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   maxMovementSpeed: 10
   acceleration: 9
-  deceleration: 2
+  deceleration: 4
   customGravity: -9.81
+  slopeGravityMultiplier: 1
   groundCheck: {fileID: 802435835}
-  groundCheckLength: 0.2
+  groundCheckRadius: 0.2
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
-  downhillGravityAngle: -20
+  downhillRotationAngle: -10
 --- !u!54 &1951439226
 Rigidbody:
   m_ObjectHideFlags: 0
