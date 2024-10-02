@@ -28,6 +28,8 @@ public class TopDownBallMovement : MonoBehaviour
     private float verticalVelocity = 0f;        // Vertical velocity to manage gravity forces
     private Vector3 slopeNormal;                // Store the slope normal for slope-related calculations
 
+    public float uphillDirectionFactor = 0.5f;  // Factor to reduce movement in the uphill direction
+    
     void Start()
     {
         rb = GetComponent<Rigidbody>();
@@ -71,10 +73,10 @@ public class TopDownBallMovement : MonoBehaviour
         movementInput = value.Get<Vector2>();  // Get movement input as a Vector2
     }
 
-    // Move the player using Rigidbody physics and project movement direction onto the slope
+    
+
     void MovePlayer()
     {
-        // If the player is providing movement input
         if (movementInput.magnitude > 0)
         {
             // Convert 2D input into 3D direction for XZ movement
@@ -82,6 +84,25 @@ public class TopDownBallMovement : MonoBehaviour
 
             // Adjust the input direction based on the slope
             Vector3 moveDirectionOnSlope = AdjustDirectionToSlope(moveDirection);
+
+            // If the player is on a slope, calculate the uphill factor
+            if (IsOnSlope)
+            {
+                // Get the uphill direction by negating the downhill direction
+                Vector3 uphillDirection = -GetDownhillDirection();
+
+                // Calculate how much of the move direction is aligned with the uphill direction
+                float uphillDot = Vector3.Dot(moveDirectionOnSlope.normalized, uphillDirection.normalized);
+
+                // If the player is moving uphill, reduce the acceleration by the uphillDirectionFactor
+                if (uphillDot > 0)  // Player is moving uphill
+                {
+                    // Reduce the acceleration based on how aligned the movement is with the uphill direction
+                    moveDirectionOnSlope -= uphillDirection * uphillDirectionFactor * uphillDot;
+                    
+                    Debug.Log($"Moving Uphill: Reducing movement by {uphillDot * uphillDirectionFactor}");
+                }
+            }
 
             // Calculate the target velocity based on the movement direction
             Vector3 targetVelocity = moveDirectionOnSlope * maxMovementSpeed;
@@ -92,25 +113,22 @@ public class TopDownBallMovement : MonoBehaviour
         else
         {
             // Decelerate when no input is provided
-            if(additionalVelocity.magnitude>0f)
-            //if(false)
+            if (additionalVelocity.magnitude > 0f)
             {
                 additionalVelocity = Vector3.MoveTowards(additionalVelocity, Vector3.zero, deceleration * Time.fixedDeltaTime);
-                if(additionalVelocity.magnitude<1f)
+                if (additionalVelocity.magnitude < 1f)
                 {
-                    movementVelocity+=additionalVelocity;
-                    additionalVelocity=Vector3.zero;
+                    movementVelocity += additionalVelocity;
+                    additionalVelocity = Vector3.zero;
                 }
             }
-            else{
+            else
+            {
                 movementVelocity = Vector3.MoveTowards(movementVelocity, Vector3.zero, deceleration * Time.fixedDeltaTime);
             }
-            
         }
-
-        // Apply the movement velocity to the rigidbody's position
-        
     }
+
 
     // Apply custom gravity while grounded and in the air
     void ApplyCustomGravity()

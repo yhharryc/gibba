@@ -1423,6 +1423,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxMovementSpeed: 10
+  maxAdditionalSpeed: 10
   acceleration: 9
   deceleration: 4
   customGravity: -9.81
@@ -1432,6 +1433,7 @@ MonoBehaviour:
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
+  uphillDirectionFactor: 0.2
   downhillRotationAngle: -10
 --- !u!54 &1951439226
 Rigidbody:
