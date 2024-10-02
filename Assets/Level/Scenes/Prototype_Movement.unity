@@ -1429,11 +1429,12 @@ MonoBehaviour:
   customGravity: -9.81
   slopeGravityMultiplier: 1
   groundCheck: {fileID: 802435835}
-  groundCheckRadius: 0.2
+  groundCheckLength: 0.2
   groundLayer:
     serializedVersion: 2
     m_Bits: 64
   uphillDirectionFactor: 0.4
+  verticalToHorizontalFactor: 1
   downhillRotationAngle: -10
 --- !u!54 &1951439226
 Rigidbody:

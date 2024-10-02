@@ -29,6 +29,7 @@ public class TopDownBallMovement : MonoBehaviour
     private Vector3 slopeNormal;                // Store the slope normal for slope-related calculations
 
     public float uphillDirectionFactor = 0.5f;  // Factor to reduce movement in the uphill direction
+    public float verticalToHorizontalFactor = 0.5f;  // Factor for vertical to horizontal velocity conversion
 
     void Start()
     {
@@ -51,6 +52,16 @@ public class TopDownBallMovement : MonoBehaviour
         //    Vector3 downhillDirection = GetDownhillDirection();
         //    Debug.Log($"Downhill Direction: {downhillDirection}");
         //}
+    }
+
+        // LateUpdate to draw velocity line and display the current velocity text
+    void LateUpdate()
+    {
+        // Draw a line showing the velocity
+        Vector3 velocityDirection = rb.velocity.normalized * 1.5f;  // Scale velocity to 1.5 units for the line
+        Debug.DrawLine(transform.position, transform.position + velocityDirection, Color.red);
+
+        
     }
 
     void FixedUpdate()
@@ -129,8 +140,27 @@ public class TopDownBallMovement : MonoBehaviour
         }
     }
 
+    void ConvertVerticalToHorizontal()
+    {
+        if (!IsOnSlope && isGrounded)
+        {
+            // Calculate the horizontal direction (XZ plane) towards downhill
+            Vector3 downhillDirection = GetDownhillDirection();
 
-    // Apply custom gravity while grounded and in the air
+            // Convert part of the vertical velocity to horizontal velocity (only XZ plane)
+            Vector3 verticalComponent = new Vector3(0, additionalVelocity.y, 0);
+            Vector3 convertedVelocity = downhillDirection * verticalComponent.magnitude * verticalToHorizontalFactor;
+
+            // Apply the converted velocity to the horizontal (XZ) plane
+            movementVelocity += new Vector3(convertedVelocity.x, 0, convertedVelocity.z);
+
+            // Reset vertical velocity after conversion
+            additionalVelocity.y = 0;
+
+            Debug.Log($"Converted {verticalComponent.magnitude * verticalToHorizontalFactor} of vertical velocity to horizontal");
+        }
+    }
+
     void ApplyCustomGravity()
     {
         if (isGrounded)
@@ -140,27 +170,29 @@ public class TopDownBallMovement : MonoBehaviour
             {
                 // Get the downhill direction of the slope
                 Vector3 downhillDirection = GetDownhillDirection();
-                //Vector3 downhillDirection = Vector3.down;
+
                 // Apply gravity force in the downhill direction
                 Vector3 slopeGravity = downhillDirection * Mathf.Abs(customGravity);
 
                 // Apply the slope gravity. Only apply to additional when movement speed reaches max. 
-                if(movementVelocity.magnitude>=maxMovementSpeed)
+                if (movementVelocity.magnitude >= maxMovementSpeed)
                 {
                     additionalVelocity += slopeGravity * Time.fixedDeltaTime;
                     // Cap the additional velocity to ensure it doesn't exceed maxAdditionalSpeed
                     additionalVelocity = Vector3.ClampMagnitude(additionalVelocity, maxAdditionalSpeed);
-
-                }else{
+                }
+                else
+                {
                     movementVelocity += slopeGravity * Time.fixedDeltaTime;
                 }
-                
             }
             else
             {
-                // When grounded, apply a minimal downward force equivalent to gravity but prevent downward velocity accumulation
+                // Convert vertical velocity to horizontal when transitioning from slope to flat ground
+                ConvertVerticalToHorizontal();
+
+                // Apply minimal downward force equivalent to gravity but prevent downward velocity accumulation
                 additionalVelocity.y = 0;
-                //additionalVelocity.y += customGravity * Time.fixedDeltaTime;
             }
         }
         else
@@ -227,7 +259,7 @@ public class TopDownBallMovement : MonoBehaviour
             downhillDirection = Quaternion.AngleAxis(downhillRotationAngle, Vector3.Cross(downhillDirection, Vector3.up)) * downhillDirection;
 
             // Draw a debug line in green to visualize the downhill direction in game mode
-            Debug.DrawLine(hit.point, hit.point + downhillDirection * 1.5f, Color.green, 1f); // 1.5 units long
+            //Debug.DrawLine(hit.point, hit.point + downhillDirection * 1.5f, Color.green, 1f); // 1.5 units long
 
             return downhillDirection;  // Return the normalized, rotated downhill direction
         }
